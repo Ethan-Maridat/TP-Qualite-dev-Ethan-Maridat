@@ -7,13 +7,13 @@ Un Tetris avec Pygame.
 Ce code est basee sur le code de Sébastien CHAZALLET, auteur du livre "Python 3, les fondamentaux du language"
 """
 
-__author__ = "votre nom"
+__author__ = "Ethan Maridat"
 __copyright__ = "Copyright 2022"
-__credits__ = ["Sébastien CHAZALLET", "Vincent NGUYEN", "votre nom"]
+__credits__ = ["Sébastien CHAZALLET", "Vincent NGUYEN", "Ethan Maridat"]
 __license__ = "GPL"
 __version__ = "1.0"
-__maintainer__ = "votre nom"
-__email__ = "votre email"
+__maintainer__ = "Ethan Maridat"
+__email__ = "ethanmrdt@gmail.com"
 
 # Probleme de l'ordre des imports
 from pygame.locals import *
@@ -28,9 +28,11 @@ DIM_PLATEAU = 10, 20
 BORDURE_PLATEAU = 4
 TAILLE_BLOC = 20, 20
 
+# Calcul des tailles du plateau de jeu et de la zone de jeu avec la bordure
 TAILLE_PLATEAU = tuple([DIM_PLATEAU[i]*TAILLE_BLOC[i] for i in range(2)])
 TAILLE_PLABORD = tuple([DIM_PLATEAU[i]*TAILLE_BLOC[i]+BORDURE_PLATEAU*2 for i in range(2)])
 
+# Calcul des tailles du plateau de jeu et de la zone de jeu avec la bordure
 MARGE = tuple([TAILLE_FENETRE[i]-TAILLE_PLATEAU[i]- BORDURE_PLATEAU*2 for i in range(2)])
 START_PLATEAU = int(MARGE[0]/2), MARGE[1]+2*BORDURE_PLATEAU
 START_PLABORD = int(MARGE[0]/2)-BORDURE_PLATEAU, MARGE[1]+BORDURE_PLATEAU
@@ -43,6 +45,8 @@ POSITION_LIGNES = POSITION_SCORE[0], 180
 POSITION_TETRIS = POSITION_SCORE[0], 210
 POSITION_NIVEAU = POSITION_SCORE[0], 240
 
+
+# Définition des formes de pièces Tetris
 PIECES = {
 	'O': [
 		'0000\n0110\n0110\n0000',
@@ -78,9 +82,12 @@ PIECES = {
 		'0000\n0070\n0770\n0070',
 	]}
 
+# Conversion des pièces Tetris en listes de listes d'entiers
 for name, rotations in PIECES.items():
 	PIECES[name] = [[[int(i) for i in p] for p in r.splitlines()] for r in rotations]
 
+
+# Définition d'un dictionnaire de couleurs pour les différentes valeurs des pièces Tetris
 COULEURS = {
 	0: (0, 0, 0),
 	1: (255, 255, 0),
@@ -94,6 +101,7 @@ COULEURS = {
 	9: (255, 255, 255),
 }
 
+# Création d'une liste contenant les clés (noms) des pièces Tetris
 PIECES_KEYS = list(PIECES.keys())
 
 # Classe Tetris
@@ -117,6 +125,7 @@ class Jeu:
 		self._attente()
 
 	def stop(self):
+		#Méthode permettant de stoper le jeu une fois perdu
 		self._afficherTexte('Perdu', CENTRE_FENETRE, font='titre')
 		self._attente()
 		self._quitter()
@@ -129,38 +138,53 @@ class Jeu:
 		rect = rendu.get_rect()
 		rect.center = position
 		self.surface.blit(rendu, rect)
+
 	def _getEvent(self):
+		# Cette méthode gère les événements Pygame, notamment la fermeture de la fenêtre et les touches du clavier.
 		for event in pygame.event.get():
 			if event.type == QUIT:
 				self._quitter()
 			if event.type == KEYUP:
+
 				if event.key == K_ESCAPE:
 					self._quitter()
 			if event.type == KEYDOWN:
+
 				if event.key == K_ESCAPE:
 					continue
 				return event.key
 				
 	def _quitter(self):
+		#Fonction permettant de fermer la page du jeu
 		print("Quitter")
 		pygame.quit()
 		sys.exit()
+
+
 	def _rendre(self):
 		pygame.display.update()
 		self.clock.tick()
+
+
 	def _attente(self):
 		print("Attente")
 		while self._getEvent() == None:
 			self._rendre()
+
 	def _getPiece(self):
+		# Cette méthode retourne une pièce Tetris aléatoire parmi les pièces disponibles.
 		return PIECES.get(random.choice(PIECES_KEYS))
+	
 	def _getCurrentPieceColor(self):
+		# Cette méthode retourne la couleur de la pièce Tetris actuelle.
 		for l in self.current[0]:
 			for c in l:
 				if c != 0:
 					return c
 		return 0
+	
 	def _calculerDonneesPieceCourante(self):
+		# Cette méthode calcule les coordonnées de la pièce Tetris actuelle en fonction de sa position et de son orientation.
 		m=self.current[self.position[2]]
 		coords = []
 		for i, l in enumerate(m):
@@ -168,7 +192,9 @@ class Jeu:
 				if k != 0:
 					coords.append([i+self.position[0], j+self.position[1]])
 		self.coordonnees = coords
+
 	def _estValide(self, x=0, y=0, r=0):
+		# Cette méthode vérifie si la position d'une pièce est valide.
 		max_x, max_y = DIM_PLATEAU
 		if r == 0:
 			coordonnees = self.coordonnees
@@ -196,7 +222,9 @@ class Jeu:
 					return False
 #		print("Position testée valide: x=%s, y=%s" % (x, y))
 		return True
+	
 	def _poserPiece(self):
+		# Cette méthode est appelée lorsque la pièce atteint la fin de sa chute et doit être placée sur le plateau.
 		print("La pièce est posée")
 		if self.position[1] <= 0:
 			self.perdu = True
@@ -228,42 +256,48 @@ class Jeu:
 			self.score += self.niveau * self.tetris
 		# Travail avec la pièce courante terminé
 		self.current = None
+
 	def _first(self):
+		# Cette méthode initialise le jeu en créant un plateau vide et en définissant les statistiques à zéro.
 		self.plateau = [[0] * DIM_PLATEAU[0] for i in range(DIM_PLATEAU[1])]
 		self.score, self.pieces, self.lignes, self.tetris, self.niveau = 0, 0, 0, 0, 1
 		self.current, self.next, self.perdu = None, self._getPiece(), False
+
 	def _next(self):
+		#Prochaine Pièce
 		print("Piece suivante")
 		self.current, self.next = self.next, self._getPiece()
 		self.pieces += 1
 		self.position = [int(DIM_PLATEAU[0] / 2)-2, -4, 0]
 		self._calculerDonneesPieceCourante()
 		self.dernier_mouvement = self.derniere_chute = time.time()
+
 	def _gererEvenements(self):
+		# Cette méthode gère les événements du jeu, tels que les mouvements de la pièce et la pause.
 		event = self._getEvent()
-		if event == K_p:
+		if event == K_p:	#Appuie sur P pour mettre pause
 			print("Pause")
 			self.surface.fill(COULEURS.get(0))
 			self._afficherTexte('Pause', CENTRE_FENETRE, font='titre')
 			self._afficherTexte('Appuyer sur une touche...', POS)
 			self._attente()
-		elif event == K_LEFT:
+		elif event == K_LEFT: #Appuie sur flèche de gauche pour deplacer vers la gauche
 			print("Mouvement vers la gauche")
 			if self._estValide(x=-1):
 				self.position[0] -= 1
-		elif event == K_RIGHT:
+		elif event == K_RIGHT: #Appuie sur flèche de droite pour deplacer vers la droite
 			print("Mouvement vers la droite")
 			if self._estValide(x=1):
 				self.position[0] += 1
-		elif event == K_DOWN:
+		elif event == K_DOWN: #Appuie sur flèche du bas pour deplacer vers le bas
 			print("Mouvement vers le bas")
 			if self._estValide(y=1):
 				self.position[1] += 1
-		elif event == K_UP:
-			print("Mouvement de rotation")
+		elif event == K_UP:#Appuie sur flèche du haut pour tourner la pièce
+			print("Mouvement de rotation") 
 			if self._estValide(r=1):
 				self.position[2] = (self.position[2] + 1) %len(self.current)
-		elif event == K_SPACE:
+		elif event == K_SPACE: #Appuie sur espace pour faire descendre la pièce
 			print("Mouvement de chute %s / %s" % (self.position, self.coordonnees))
 			if self.position[1] <=0:
 				self.position[1] = 1
@@ -273,6 +307,7 @@ class Jeu:
 				a+=1
 			self.position[1] += a-1
 		self._calculerDonneesPieceCourante()
+		
 	def _gererGravite(self):
 		if time.time() - self.derniere_chute > 0.35:
 			self.derniere_chute = time.time()
@@ -288,6 +323,7 @@ class Jeu:
 				print("On déplace vers le bas")
 				self.position[1] += 1
 				self._calculerDonneesPieceCourante()
+
 	def _dessinerPlateau(self):
 		self.surface.fill(COULEURS.get(0))
 		pygame.draw.rect(self.surface, COULEURS[8], START_PLABORD+TAILLE_PLABORD, BORDURE_PLATEAU)
@@ -310,6 +346,7 @@ class Jeu:
 		self._afficherTexte('Niveau: %s' % self.niveau, POSITION_NIVEAU)
 
 		self._rendre()
+
 	def play(self):
 		print("Jouer")
 		self.surface.fill(COULEURS.get(0))
