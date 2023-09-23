@@ -87,7 +87,7 @@ class Jeu:
 
     def _attente(self):
         print("Attente")
-        while self._getEvent() == None:
+        while self._get_event() == None:
             self._rendre()
 
     def _get_piece(self):
@@ -106,44 +106,47 @@ class Jeu:
         # Cette méthode calcule les coordonnées de la pièce Tetris actuelle en fonction de sa position et de son orientation.
         m = self.current[self.position[2]]
         coords = []
-        for i, l in enumerate(m):
-            for j, k in enumerate(l):
-                if k != 0:
+        for i, ligne in enumerate(m):
+            for j, case in enumerate(ligne):
+                if case != 0:
                     coords.append([i + self.position[0], j + self.position[1]])
         self.coordonnees = coords
 
-    def _est_valide(self, x=0, y=0, r=0):
+    def _est_valide(self, x=0, y=0, rotation=0):
         # Cette méthode vérifie si la position d'une pièce est valide.
-        max_x, max_y = DIM_PLATEAU
-        if r == 0:
+        largeur_plateau, hauteur_plateau = DIM_PLATEAU
+
+        if rotation == 0:
             coordonnees = self.coordonnees
         else:
-            m = self.current[(self.position[2] + r) % len(self.current)]
+            couche_rotation = self.current[(self.position[2] + rotation) % len(self.current)]
             coords = []
-            for i, l in enumerate(m):
-                for j, k in enumerate(l):
-                    if k != 0:
-                        coords.append(
-                            [i + self.position[0], j + self.position[1]])
+
+            for i, ligne in enumerate(couche_rotation):
+                for j, cellule in enumerate(ligne):
+                    if cellule != 0:
+                        coords.append([i + self.position[0], j + self.position[1]])
+
             coordonnees = coords
-#			print("Rotation testée: %s" % coordonnees)
+
         for cx, cy in coordonnees:
-            if not 0 <= x + cx < max_x:
-                #				print("Non valide en X: cx=%s, x=%s" % (cx, x))
+            if not 0 <= x + cx < largeur_plateau:
+                # La pièce dépasse les limites horizontales du plateau.
                 return False
             elif cy < 0:
+                # La pièce dépasse les limites verticales supérieures du plateau.
                 continue
-            elif y + cy >= max_y:
-                #				print("Non valide en Y: cy=%s, y=%s" % (cy, y))
+            elif y + cy >= hauteur_plateau:
+                # La pièce dépasse les limites verticales inférieures du plateau.
                 return False
             else:
                 if self.plateau[cy + y][cx + x] != 0:
-                    #					print("Position occupée sur le plateau")
+                    # La position est déjà occupée sur le plateau.
                     return False
-
-
-#		print("Position testée valide: x=%s, y=%s" % (x, y))
+        
+        # Si toutes les vérifications ont réussi, la position est valide.
         return True
+
 
     def _poser_piece(self):
         # Cette méthode est appelée lorsque la pièce atteint la fin de sa chute et doit être placée sur le plateau.
@@ -196,7 +199,7 @@ class Jeu:
 
     def _gerer_evenements(self):
         # Cette méthode gère les événements du jeu, tels que les mouvements de la pièce et la pause.
-        event = self._getEvent()
+        event = self._get_event()
         if event == K_p:  #Appuie sur P pour mettre pause
             print("Pause")
             self.surface.fill(COULEURS.get(0))
@@ -217,7 +220,7 @@ class Jeu:
                 self.position[1] += 1
         elif event == K_UP:  #Appuie sur flèche du haut pour tourner la pièce
             print("Mouvement de rotation")
-            if self._est_valide(r=1):
+            if self._est_valide(rotation=1):
                 self.position[2] = (self.position[2] + 1) % len(self.current)
         elif event == K_SPACE:  #Appuie sur espace pour faire descendre la pièce
             print("Mouvement de chute %s / %s" %
