@@ -50,7 +50,7 @@ class Jeu:
         self._attente()
         self._quitter()
 
-    def _afficher_texte(self, text, position, couleur=9, font='defaut'):
+    def _afficher_texte(self, text: str, position:tuple, couleur: int =9, font: str ='defaut'):
         #		print("Afficher Texte")
         font = self.fonts.get(font, self.fonts['defaut'])
         couleur = COULEURS.get(couleur, COULEURS[9])
