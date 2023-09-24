@@ -36,6 +36,6 @@ pylint --rcfile=pylint.google tetris.py
 
 ## ---------
 
-Je n'ai pas réussi a faire l'étape 11, qui était de créer un GitHub Action
+Je n'ai pas réussi à faire l'étape 11, qui était de créer un GitHub Action
 
 
