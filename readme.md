@@ -34,5 +34,8 @@ Pour tester le code avec pylint en utilisant la configuration du fichier j'utili
 
 pylint --rcfile=pylint.google tetris.py 
 
+## ---------
+
+Je n'ai pas réussi a faire l'étape 11, qui était de créer un GitHub Action
 
 
