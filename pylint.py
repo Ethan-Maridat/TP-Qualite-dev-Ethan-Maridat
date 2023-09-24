@@ -154,7 +154,9 @@ disable=abstract-method,
         R1736,
         W0622,
         E0602,
-        C0413
+        C0413,
+        W0614,
+        R1728
 
 
 [REPORTS]
